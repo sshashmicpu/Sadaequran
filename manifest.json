@@ -1,8 +1,8 @@
 {
   "name": "Sada-e-Quran | Syed Sakhir Hashmi",
   "short_name": "Sada-e-Quran",
-  "description": "Tasbeeh, Tilawat aur Tarjuma-e-Quran ka mukammal digital tajurba.",
-  "start_url": "index.html",
+  "description": "Listen, Read and understand Quran with style.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#d4af37",
