@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>صدائے قرآن | Syed Sakhir Hashmi</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d4af37">
+
     <style>
         :root {
             --accent: #d4af37; --bg: #000000; --sidebar-bg: #000000;
@@ -389,6 +392,28 @@
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') await requestWakeLock();
         });
-    </script>
+    
+    // Service Worker Registration & Update Logic
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('SW Registered!');
+            
+            // Nayi update check karne ke liye
+            reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Jab naya version mil jaye to user ko batayein ya auto-refresh karein
+                        console.log('New update available. Please refresh.');
+                        // Agar aap chahte hain ke auto update ho jaye:
+                        // window.location.reload(); 
+                    }
+                };
+            };
+        }).catch(err => console.log('SW Registration Failed:', err));
+    });
+}
+</script>
 </body>
 </html>
