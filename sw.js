@@ -1,6 +1,6 @@
 /* Sada-e-Quran | Service Worker (Fixed Version) */
 
-const CACHE_NAME = 'sada-e-quran-v1.0.1'; // Version barha diya
+const CACHE_NAME = 'sada-e-quran-v1.0.2'; // Version barha diya
 const OFFLINE_URL = 'index.html';
 
 const ASSETS_TO_CACHE = [
