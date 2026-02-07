@@ -1,6 +1,6 @@
 /* Sada-e-Quran | Service Worker (Font & Audio Optimized) */
 
-const CACHE_NAME = 'sada-e-quran-v1.0.6'; 
+const CACHE_NAME = 'sada-e-quran-v1.0.8'; 
 const OFFLINE_URL = './index.html';
 
 // Critical assets to save immediately on first load
