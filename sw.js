@@ -1,18 +1,18 @@
-/* Sada-e-Quran | Service Worker (The Ultimate Offline Magic) */
+/* Sada-e-Quran | Service Worker (Font & Audio Optimized) */
 
 const CACHE_NAME = 'sada-e-quran-v1.0.6'; 
 const OFFLINE_URL = './index.html';
 
-// وہ فائلیں جو پہلے ہی لمحے سیو ہونی چاہئیں
+// Critical assets to save immediately on first load
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './68961.png', // آپ کا لوگو/آئیکن
+  './68961.png',
   'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu&family=Inter:wght@400;600&display=block'
 ];
 
-// 1. Install: سب سے پہلے ضروری سامان کو تجوری (Cache) میں ڈالو
+// 1. Install: Lock essential files into the cache
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
@@ -27,7 +27,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activate: پرانے ورژن کو ہٹاؤ تاکہ نیا جادو کام کرے
+// 2. Activate: Clean up old versions so the new magic takes over
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -40,20 +40,21 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Fetch: جب بھی کچھ لوڈ ہو، یہ پہرے دار چیک کرے گا
+// 3. Fetch: The "Guardian" that serves files from cache or saves new ones
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // اگر تجوری میں مل گیا تو انٹرنیٹ کی ضرورت ہی نہیں
+      // If found in cache, return it immediately (no internet needed)
       if (cachedResponse) return cachedResponse;
 
-      // اگر نہیں ملا تو انٹرنیٹ سے لاؤ اور ساتھ ہی تجوری میں بھی رکھ لو
+      // If not in cache, fetch from internet
       return fetch(event.request).then((networkResponse) => {
+        // Only cache valid responses
         if (!networkResponse || networkResponse.status !== 200) return networkResponse;
 
-        // جادوئی حصہ: فونٹس، آڈیو فائلیں اور قرآنی ڈیٹا کو خودبخود سیو کرنا
+        // DYNAMIC MAGIC: Automatically save Fonts, MP3s, and Quran API data as they are used
         if (url.includes('fonts.gstatic.com') || url.includes('.mp3') || url.includes('alquran.cloud')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -63,7 +64,7 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // اگر بالکل ہی انٹرنیٹ غائب ہو جائے تو ہوم پیج دکھاؤ
+        // If internet is totally gone and file isn't cached
         if (event.request.mode === 'navigate') {
           return caches.match(OFFLINE_URL) || caches.match('./');
         }
