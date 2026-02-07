@@ -1,65 +1,65 @@
-/* Sada-e-Quran | Service Worker (Smart Offline Version) */
+/* Sada-e-Quran | Service Worker (Font & Audio Optimized) */
 
-const CACHE_NAME = 'sada-e-quran-v1.1.0'; 
-const OFFLINE_URL = 'index.html';
+const CACHE_NAME = 'sada-e-quran-v1.0.6'; 
+const OFFLINE_URL = './index.html';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './68961.png',
-  'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu&family=Inter:wght@400;600&display=swap'
+  'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu&family=Inter:wght@400;600&display=block'
 ];
 
-// 1. Install: Basic files ko save karna
+// 1. Install: Zaruri files save karna
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return Promise.all(
+        ASSETS_TO_CACHE.map(url => {
+          return cache.add(url).catch(err => console.log('Sada-e-Quran Cache Fail:', url));
+        })
+      );
     })
   );
-  self.skipWaiting();
 });
 
-// 2. Activate: Purana kachra saaf karna
+// 2. Activate: Purana cache hatana
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       );
     })
   );
   self.clients.claim();
 });
 
-// 3. Fetch: Asli Jadu yahan hai
+// 3. Fetch: Font, Audio aur API ko cache karna
 self.addEventListener('fetch', (event) => {
-  // Hum har request ko check karenge (Audio aur API samait)
+  const url = event.request.url;
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Agar cache mein hai to wahi se dedo
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
 
-      // Agar cache mein nahi hai to internet se mangwao
       return fetch(event.request).then((networkResponse) => {
-        // Agar response sahi hai aur ye Audio ya API hai, to isay save karlo agli baar ke liye
-        if (networkResponse && networkResponse.status === 200 && 
-           (event.request.url.includes('.mp3') || event.request.url.includes('alquran.cloud'))) {
+        if (!networkResponse || networkResponse.status !== 200) return networkResponse;
+
+        // Font files (gstatic), Audio (.mp3) aur Quran Data (alquran.cloud) ko save karna
+        if (url.includes('fonts.gstatic.com') || url.includes('.mp3') || url.includes('alquran.cloud')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
+
         return networkResponse;
       }).catch(() => {
-        // Agar internet nahi hai aur file cache mein bhi nahi mili
         if (event.request.mode === 'navigate') {
-          return caches.match(OFFLINE_URL);
+          return caches.match(OFFLINE_URL) || caches.match('./');
         }
       });
     })
